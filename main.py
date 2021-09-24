@@ -10,6 +10,7 @@ from compounds_to_db import *
 from call_db import *
 import logging
 
+print('hello')
 
 count = Counter()
 logger = logging.getLogger(__name__)
