@@ -1,0 +1,34 @@
+2021-09-13 10:37:18,555 - __main__ - INFO - Function "alter_file" ran
+2021-09-13 10:37:18,572 - __main__ - DEBUG - Material "MATR 1466" added
+2021-09-13 10:37:18,573 - __main__ - DEBUG - Nuclear density "BA  0.0448 / N  0.0075 / O  0.0149 / " added
+2021-09-13 10:37:18,577 - __main__ - INFO - Function "output" ran
+2021-09-13 10:37:18,592 - __main__ - INFO - Saving path is "T:\programming\Isotopes_prod\output_mcu\Ba(NO3)2_2021-09-13" where "matr" created successfully
+2021-09-13 10:37:37,585 - __main__ - INFO - Function "alter_file" ran
+2021-09-13 10:37:37,600 - __main__ - DEBUG - Material "MATR 1466" added
+2021-09-13 10:37:37,619 - __main__ - DEBUG - Nuclear density "BA  0.0448 / N  0.0075 / O  0.0149 / " added
+2021-09-13 10:37:37,667 - __main__ - INFO - Function "output" ran
+2021-09-13 10:37:37,739 - __main__ - INFO - Saving path is "T:\programming\Isotopes_prod\output_mcu\Ba(NO3)2_2021-09-13" where "matr" created successfully
+2021-09-13 10:44:17,089 - __main__ - INFO - Function "alter_file" ran
+2021-09-13 10:44:17,156 - __main__ - DEBUG - Material "MATR 1466" added
+2021-09-13 10:44:17,184 - __main__ - DEBUG - Nuclear density "BA  0.0448 / N  0.0075 / O  0.0149 / " added
+2021-09-13 10:44:17,229 - __main__ - INFO - Function "output" ran
+2021-09-13 10:44:17,284 - __main__ - INFO - Saving path is "T:\programming\Isotopes_prod\output_mcu\Ba(NO3)2_2021-09-13" where "matr" created successfully
+2021-09-24 15:08:38,624 - __main__ - INFO - Function "alter_file" ran
+2021-09-24 15:08:38,629 - __main__ - DEBUG - Material "MATR 1466" added
+2021-09-24 15:08:38,630 - __main__ - DEBUG - Nuclear density "BA  0.0448 / N  0.0075 / O  0.0149 / " added
+2021-09-24 15:08:38,632 - __main__ - INFO - Function "output" ran
+2021-09-24 15:08:38,642 - __main__ - INFO - Saving path is "Z:\programming\Isotopes_prod\output_mcu\Ba(NO3)2_2021-09-24" where "matr" created successfully
+2021-09-24 15:09:08,238 - __main__ - INFO - Function "alter_file" ran
+2021-09-24 15:09:08,239 - __main__ - DEBUG - Body "RCZ BANO1 0,0,28.0 1.0 1.5
+RCZ BANO2 0,0,29.0 1.0 1.5
+RCZ BANO3 0,0,30.0 1.0 1.5
+RCZ BANO4 0,0,31.0 1.0 1.5
+RCZ BANO5 0,0,32.0 1.0 1.5
+RCZ BANO6 0,0,33.0 1.0 1.5
+RCZ BANO7 0,0,34.0 1.0 1.5
+RCZ BANO8 0,0,35.0 1.0 1.5
+RCZ BANO9 0,0,36.0 1.0 1.5
+RCZ BANO10 0,0,37.0 1.0 1.5
+" has added in block from line "984"
+2021-09-24 15:09:08,241 - __main__ - INFO - Function "output" ran
+2021-09-24 15:09:08,247 - __main__ - INFO - Saving path is "Z:\programming\Isotopes_prod\output_mcu\Ba(NO3)2_2021-09-24" where "geom" created successfully
