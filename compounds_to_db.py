@@ -101,12 +101,18 @@ class Comp_to_db:
     async def get_coeffs(self):  #*call as asyncio 
         print('get coeffs started')
         await asyncio.sleep(0.25)
-        pattern = re.compile(r'[A-Z][a-z]?\d?')
+        pattern = re.compile(r'([A-Z][a-z]?\d?)')
         res = re.findall(pattern, self.inp_comp)
+        print(res)
         for i in res:
-            num = re.search(r'[0-9]', i)
-            print(num)
-        # res = pattern.finditer(self.inp_comp)
+            try:
+                coeff = re.compile(r'[0-9]').search(i).group(0)
+                self.coeffs.update({self}  )
+                print(num)
+            except Exception as e:
+                print(e)
+
+        # re s = pattern.finditer(self.inp_comp)
         print(f'my results {res}') 
 
     # @property
