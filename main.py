@@ -10,8 +10,6 @@ from compounds_to_db import *
 from call_db import *
 import logging
 
-print('hello')
-
 count = Counter()
 logger = logging.getLogger(__name__)
 PATH = os.path.join(os.getcwd(), 'output_mcu', logger.name)
@@ -81,7 +79,8 @@ class Make_matr(PrepCals):
                     get_nucl = asyncio.create_task(self.add_todb.get_nuclides())
                     await scrap
                     await get_nucl
-                    return self.add_todb.densities
+                    return
+                    # return self.add_todb.densities
                 self.nuc_dens=asyncio.run(asy_main())
             else:
                 self.nuc_dens = self.comp_db.call_existing(self.inp_comp)
@@ -113,7 +112,7 @@ class Make_geom(PrepCals):
         self.inp_comp = kwargs['input']
         self.FILE_PATH = os.path.join(
             self.direc, 'input_mcu_file', 'geom_be_tvs_6layer_10.12.2018')
-        self.towrite_data = self.open(self.FILE_PATH)  # * open file and tale all content
+        self.towrite_data = self.open(self.FILE_PATH)  # * open file and grap all content
         self.CH_NAME = 'CEC1'
         self.MAX_RAD = 2
         self.MIN_MAX_h = [-4, 62]
@@ -149,6 +148,7 @@ class Make_geom(PrepCals):
             self.towrite_data[self.starting_line:], start=1) if 'END' in i or 'ENDL' in i)
         self.finish_line_g = next(get_range)[0].__add__(self.starting_line)
         return self.towrite_data[self.starting_line: self.finish_line_g]
+
     
     @logging_decor
     def alter_file(self):
@@ -171,10 +171,10 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'Ba(NO3)2'
+    comp = 'Ni(N2O3)2'
     with concurrent.futures.ThreadPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).make())
-        r2 = executor.submit(Make_geom(input=comp).make())
+        # r2 = executor.submit(Make_geom(input=comp).make())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()

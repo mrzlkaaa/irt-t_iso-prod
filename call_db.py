@@ -35,7 +35,7 @@ class Call_PT(Call_db):
 class Call_comp(Call_db):
     def __init__(self, *args, **kwargs):
         super().__init__()
-        self.table = Compounds
+        self.table = Compounds #sqlalchemy class
         self.session = self.run_session
 
     @property
