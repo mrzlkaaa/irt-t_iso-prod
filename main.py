@@ -171,7 +171,7 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'Ni(N2O3)2'
+    comp = 'Ni2(N2O3)2'
     with concurrent.futures.ThreadPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).make())
         # r2 = executor.submit(Make_geom(input=comp).make())
