@@ -79,8 +79,7 @@ class Make_matr(PrepCals):
                     get_nucl = asyncio.create_task(self.add_todb.get_nuclides())
                     await scrap
                     await get_nucl
-                    return
-                    # return self.add_todb.densities
+                    return self.add_todb.densities
                 self.nuc_dens=asyncio.run(asy_main())
             else:
                 self.nuc_dens = self.comp_db.call_existing(self.inp_comp)
@@ -174,7 +173,7 @@ if __name__ == '__main__':
     comp = 'Ni(N2O3)2'
     with concurrent.futures.ThreadPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).make())
-        # r2 = executor.submit(Make_geom(input=comp).make())
+        r2 = executor.submit(Make_geom(input=comp).make())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()

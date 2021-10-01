@@ -26,7 +26,7 @@ class Comp_to_db:
 
     async def get_nuclides(self):
         print('get_nucl has started')
-        self.list_elems = re.findall(r'[A-Za-z]|[A-Z]', self.inp_comp)
+        self.list_elems = re.findall(r'[A-Z][a-z]?', self.inp_comp)
         print(self.list_elems)
         self.comp_elems = ','.join(self.list_elems)
         filtr = {k: v[0]
@@ -60,78 +60,43 @@ class Comp_to_db:
                 mping[0]), float(mping[1])
         except Exception as e:
             print(e)
-            # self.comp_name = input('Type name of compound: ')
-            # self.molar_mass = float(input('Type molar mass of compound: '))
-            # self.comp_density = float(input('Type density of compound: '))
+            self.comp_name = input('Type name of compound: ')
+            self.molar_mass = float(input('Type molar mass of compound: '))
+            self.comp_density = float(input('Type density of compound: '))
         print('scraping has finished')
         return
-
-    # async def get_coeffs(self):  #*call as asyncio 
-    #     print('get coeffs started')
-    #     await asyncio.sleep(0.25)
-    #     pattern = re.compile(r'\d')
-    #     res = pattern.finditer(self.inp_comp)
-    #     for v in res:
-    #         if self.inp_comp[v.span()[0]-1] != ')' and self.inp_comp[v.span()[0]-1].islower() == False:
-    #             self.coeffs.update(
-    #                 {self.inp_comp[v.span()[0]-1]: int(self.inp_comp[v.span()[0]])})
-    #         elif self.inp_comp[v.span()[0]-1] != ')' and self.inp_comp[v.span()[0]-1].islower():
-    #             self.coeffs.update(
-    #                 {self.inp_comp[v.span()[0]-2:v.span()[0]]: int(self.inp_comp[v.span()[0]])})
-    #     # print(self.coeffs)
-    #     await asyncio.sleep(0.25) #*check for other func
-    #     elems_got_coefs = copy.copy(self.coeffs)
-    #     self.coeffs.update({j: 1 for j in self.comp_elems.split(
-    #         ',') if j not in ''.join(elems_got_coefs.keys())})
-    #     print(self.coeffs)
-    #     if '(' in self.inp_comp:
-    #         pattern_with_parh = re.compile(r'[(]\w+[)]\w+')
-    #         parh_match = pattern_with_parh.search(self.inp_comp)
-    #         matches = parh_match.group()
-    #         multi_coef = int(matches[-1:])
-    #         up_on_multi = {k: v*multi_coef for k, v in self.coeffs.items()
-    #                        if k in matches}
-    #         self.coeffs.update(up_on_multi)
-    #         # print(self.coeffs)
-    #         return 
-    #     else:
-    #         print('get coeffs finished')
-    #         return
 
     async def get_coeffs(self):  #*call as asyncio 
         print('get coeffs started')
         await asyncio.sleep(0.25)
         pattern = re.compile(r'([A-Z][a-z]?\d?)')
         res = re.findall(pattern, self.inp_comp)
-        print(res)
-        for i in res:
+        for n,i in enumerate(res):
             try:
                 coeff = re.compile(r'[0-9]').search(i).group(0)
-                self.coeffs.update({self}  )
-                print(num)
+                self.coeffs.update({self.list_elems[n]:int(coeff)})
+                print(i)
             except Exception as e:
+                self.coeffs.update({self.list_elems[n]:1})
                 print(e)
+        if ')' in self.inp_comp:
+            extra_coeff = int(re.compile(r'[0-9]$').search(self.inp_comp).group(0))
+            iso_to_multi = set(list(self.coeffs.keys())).intersection(set(self.list_elems[1:]))
+            self.coeffs.update({k:v*extra_coeff for k, v in self.coeffs.items() for i in iso_to_multi if k==i})
+            print(self.coeffs)
 
-        # re s = pattern.finditer(self.inp_comp)
-        print(f'my results {res}') 
-
-    # @property
-    # def densities(self):
-    #     comp_nucden = self.NA*self.comp_density/self.molar_mass
-    #     self.nuc_dens.update({k: format(v*comp_nucden, '.4f')
-    #                           for k, v in self.coeffs.items()})
-    #     data_to_add = Call_comp().table(comp_name=self.comp_name, comp_formula=self.inp_comp,
-    #                                     molar_mass=self.molar_mass, density=self.comp_density, nuclides=self.comp_nuclides, nuclides_as_elems=self.comp_elems, nuclear_densities=','.join(self.nuc_dens.values()))
-    #     Call_comp().add(data=data_to_add)  # * add to db
-    #     return self.nuc_dens
+    @property
+    def densities(self):
+        comp_nucden = self.NA*self.comp_density/self.molar_mass
+        self.nuc_dens.update({k: format(v*comp_nucden, '.4f')
+                              for k, v in self.coeffs.items()})
+        data_to_add = Call_comp().table(comp_name=self.comp_name, comp_formula=self.inp_comp,
+                                        molar_mass=self.molar_mass, density=self.comp_density, nuclides=self.comp_nuclides, nuclides_as_elems=self.comp_elems, nuclear_densities=','.join(self.nuc_dens.values()))
+        # Call_comp().add(data=data_to_add)  # * add to db
+        return self.nuc_dens
 
 # * template
 # * input: formula like: UO2, NACl and so on
 # * cols: ['comp_formula', 'comp_name','molar_mass', 'density', 'nuclides']
 
-# if __name__ == '__main__':
-#     input = 'Al2O3'
-#     if '(' in input:
-#         Comp_to_db()
-#     else:
 
