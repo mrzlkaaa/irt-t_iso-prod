@@ -9,6 +9,8 @@ from collections import Counter
 from compounds_to_db import *
 from call_db import *
 import logging
+from shapes_predictor.draw import Draw
+
 
 count = Counter()
 logger = logging.getLogger(__name__)
@@ -121,7 +123,6 @@ class Make_geom(PrepCals):
             if value <= max_value:
                 return value
             else:
-                raise ValueError
                 return self.exception(float(input(f'type value that smaller of equal to {max_value} ')), max_value)
         else:
             if min_value <= value <= max_value:
@@ -132,6 +133,10 @@ class Make_geom(PrepCals):
     @property
     def set_h(self):
         return mean(list(map(abs, self.MIN_MAX_h)))-self.height/2
+
+    @property
+    def set_r(self):
+        return mean(list(map(abs, self.MIN_MAX_h)))-self.height/2 #
     
     @property
     def parse_block(self):
@@ -153,6 +158,7 @@ class Make_geom(PrepCals):
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
         for i in range(self.sample_parts):
             pattern += f'RCZ {drop_nums}{i+1} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {self.radius}\n'
+        Draw().play() if input('Is radius split required? ') == 'y' else print('one cylinder setted') 
         block = self.parse_block
         for n, i in enumerate(block):
             if i.startswith('\n'):

@@ -7,7 +7,7 @@ import logging
 from collections import Counter
 from PIL import Image
 from pygame.locals import *
-from model import *
+# from model import *
 
 #folder structure
 #circles--->
@@ -18,46 +18,32 @@ from model import *
 # ->3circles
 #   -> .png names statrwith 2circles(random_chars).png
 # ..........
-
-#global settings
-os.environ['SDL_VIDEODRIVER'] = 'dummy'
 pygame.init()
-width, height = 800, 600
-white = [255,255,255]
-black = [0,0,0]
-display = pygame.display.set_mode((width, height))
-display.fill(white)
-pix_arr = pygame.PixelArray(display)
-press = False
-
-# #logging settings
-# logger = logging.getLogger(__name__)
-# PATH = os.path.join(os.getcwd(), 'output_mcu', logger.name)
-# logger.setLevel(logging.INFO)
-# logger.setLevel(logging.DEBUG)
-# file_str = logging.FileHandler(f'{PATH}')
-# logger.addHandler(file_str)
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# file_str.setFormatter(formatter)
-
-# def logging_decor(func):
-#     print(func)
-#     def wrapper(*args, **kwargs):
-#         logger.info(f'Function "{func.__name__}" ran')
-#         func(*args, **kwargs)
-#     return wrapper
 
 class Draw:
+    width, height = 800, 600
+    white = [255,255,255]
+    black = [0,0,0]
+    CWD = os.getcwd()
+
+
     def __init__(self):
         self.count = Counter()
         self.circle = 'circles'
-        self.cwd = os.getcwd()
+        
         self.dcount = {}
+        self.set_display()
+
+    def set_display(self):
+        self.display = pygame.display.set_mode((self.width, self.height))
+        self.display.fill(self.white)
+        self.pix_arr = pygame.PixelArray(self.display)
+        self.press = False
 
     def mk_path(self, num, input):
-        if not os.path.exists(os.path.join(cwd, input)):
-            os.mkdir(os.path.join(cwd, input))
-        PATH = os.path.join(cwd, input)
+        if not os.path.exists(os.path.join(self.CWD, input)):
+            os.mkdir(os.path.join(CWD, input))
+        PATH = os.path.join(CWD, input)
         response_path = os.path.join(PATH, f'{num}{input}')
         if not os.path.exists(response_path):
             os.mkdir(response_path)
@@ -85,7 +71,7 @@ class Draw:
             print('call')
             self.full_path = self.mk_path(folder_num, option)
             print(self.full_path)
-            pygame.image.save(display, os.path.join(self.full_path, f'{self.random_chars}.jpeg'))
+            pygame.image.save(self.display, os.path.join(self.full_path, f'{self.random_chars}.jpeg'))
             self.dcount.clear()
             return True
 
@@ -107,20 +93,20 @@ class Draw:
                 # print(get_pos(px,py))
 
             if event.type == pygame.MOUSEBUTTONUP:
-                pygame.draw.circle(display, black, (self.px, self.py), rad, width=5)
+                pygame.draw.circle(self.display, self.black, (self.px, self.py), rad, width=5)
                 self.dcount[f'radius{rad}'] = '+'
                 print(self.dcount)
                 press=False
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
-                display.fill(white)
+                self.display.fill(self.white)
                 self.dcount.clear()
 
-            if keys[pygame.K_c]:
+            # if keys[pygame.K_c]:
                 # save_to_predict = self.mk_path(input)
 
-                self.predict()
+                # self.predict()
 
             if keys[pygame.K_s]:
                 self.save(self.circle)
@@ -129,7 +115,7 @@ class Draw:
             pygame.display.update()
         return
 
-#predictions
+#predictions #! Not avaliable still
 class Predict(Draw):
     def __init__(self):
         super().__init__()
@@ -168,7 +154,8 @@ class Predict(Draw):
 
 
 if __name__ == '__main__':
-    Predict().play()
+    print(f'running from {__name__}')
+    Draw().play()
 
 
 
