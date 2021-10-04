@@ -106,27 +106,22 @@ class Make_matr(PrepCals):
 
 
 class Make_geom(PrepCals):
+    MAX_RAD = 2
+    MIN_MAX_h = [-4, 62]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.inp_comp = kwargs['input']
         self.FILE_PATH = os.path.join(
             self.direc, 'input_mcu_file', 'geom_be_tvs_6layer_10.12.2018')
         self.towrite_data = self.open(self.FILE_PATH)  # * open file and grap all content
-        self.CH_NAME = 'CEC1'
-        self.MAX_RAD = 2
-        self.MIN_MAX_h = [-4, 62]
-        self.height = self.exception(float(input('Type height of sample: ')), self.MIN_MAX_h[1], self.MIN_MAX_h[0])
-        self.radius = self.exception(float(input('Type radius of sample: ')), self.MAX_RAD)
-        self.sample_parts = int(input('Type on how many parts split body: '))
+        self.CH_NAME = 'CEC1' #* will be dynamic
 
-    def make(self):
-        self.alter_file()
-
-    def exception(self, value, max_value, min_value=None):
+    def exception(self, value, max_value, min_value=None): #TODO add exceptions and error handlers
         if min_value is None:
             if value <= max_value:
                 return value
             else:
+                raise ValueError
                 return self.exception(float(input(f'type value that smaller of equal to {max_value} ')), max_value)
         else:
             if min_value <= value <= max_value:
@@ -151,8 +146,10 @@ class Make_geom(PrepCals):
     
     @logging_decor
     def alter_file(self):
+        self.height = self.exception(float(input('Type height of sample: ')), self.MIN_MAX_h[1], self.MIN_MAX_h[0])
+        self.radius = self.exception(float(input('Type radius of sample: ')), self.MAX_RAD)
+        self.sample_parts = int(input('Type on how many parts split body: '))
         pattern = str()
-        # drop_nums = re.search(r"[^()0-9]+", self.inp_comp).group().upper()
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
         for i in range(self.sample_parts):
             pattern += f'RCZ {drop_nums}{i+1} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {self.radius}\n'
@@ -162,7 +159,6 @@ class Make_geom(PrepCals):
                 count.update('+')  # *count of lines that added
                 self.towrite_data.insert(n+self.starting_line, pattern)
         logger.debug(f'Body "{pattern}" has added in block from line "{self.starting_line}"')
-        # print(self.towrite_data[self.starting_line:self.finish_line_g+len(count)])
         self.output('geom')
         return
 
@@ -170,10 +166,10 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'Ni(N2O3)2'
+    comp = 'Al2O3'
     with concurrent.futures.ThreadPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).make())
-        r2 = executor.submit(Make_geom(input=comp).make())
+        r2 = executor.submit(Make_geom(input=comp).alter_file())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()

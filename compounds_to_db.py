@@ -83,7 +83,7 @@ class Comp_to_db:
             extra_coeff = int(re.compile(r'[0-9]$').search(self.inp_comp).group(0))
             iso_to_multi = set(list(self.coeffs.keys())).intersection(set(self.list_elems[1:]))
             self.coeffs.update({k:v*extra_coeff for k, v in self.coeffs.items() for i in iso_to_multi if k==i})
-            print(self.coeffs)
+            # print(self.coeffs)
 
     @property
     def densities(self):
