@@ -1,5 +1,5 @@
 [[source]]
-url = "https://pypi.python.org/simple"
+url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
@@ -55,8 +55,9 @@ Werkzeug = "==2.0.1"
 wrapt = "==1.12.1"
 bs4 = "*"
 pip = "==9.0.2"
+psycopg2-binary = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

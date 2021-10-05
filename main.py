@@ -133,9 +133,10 @@ class Make_geom(PrepCals):
     def set_h(self):
         return mean(list(map(abs, self.MIN_MAX_h)))-self.height/2
 
-    @property
-    def set_r(self):
-        return mean(list(map(abs, self.MIN_MAX_h)))-self.height/2 #
+    
+    def set_r(self, radius, parts):
+        radius-=self.radius/parts
+        return radius
     
     @property
     def parse_block(self):
@@ -151,12 +152,16 @@ class Make_geom(PrepCals):
     def alter_file(self):
         self.height = self.exception(float(input('Type height of sample: ')), self.MIN_MAX_h[1], self.MIN_MAX_h[0])
         self.radius = self.exception(float(input('Type radius of sample: ')), self.MAX_RAD)
-        self.sample_parts = int(input('Type on how many parts split body: '))
+        self.sample_parts = int(input('Type on how many parts divide body: '))
         pattern = str()
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
-        for i in range(self.sample_parts):
-            pattern += f'RCZ {drop_nums}{i+1} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {self.radius}\n'
-        Predict().predict() if input('Is radius split required? ') == 'y' else print('one cylinder setted') 
+        print(drop_nums)
+        self.rad_parts = Predict().predict if input('Is radius division required? ') == 'y' else 1
+        for i in range(1, self.sample_parts+1):
+            for j in range(1, self.rad_parts+1):
+                pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {format(self.radius.__sub__(self.set_r(self.radius, j)), ".3f")}\n'
+        print(pattern)
+        
         block = self.parse_block
         for n, i in enumerate(block):
             if i.startswith('\n'):

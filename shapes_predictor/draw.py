@@ -125,6 +125,7 @@ class Predict(Draw):
     def last_created_img(self):
         return sorted(os.listdir(self.full_path), key=lambda x: os.stat(os.path.join(self.full_path,x)).st_mtime, reverse=True)
 
+    @property
     def predict(self):
         # if self.save(self.predictions):
             # print(self.last_created_img())
@@ -143,8 +144,9 @@ class Predict(Draw):
         print(predict)
         index = np.argwhere(predict[0]==np.amax(predict[0]))[0]
         print(index)
-        print(f'I predict there is/are { self.class_names[index[0]]} on screen!')
-        return
+        print(f'I predict there is/are {self.class_names[index[0]]} on screen!')
+        print(int(self.class_names[index[0]].split()[0]))
+        return int(self.class_names[index[0]].split()[0])
 
         # model = predict
     #play
