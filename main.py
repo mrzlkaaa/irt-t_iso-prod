@@ -9,8 +9,7 @@ from collections import Counter
 from compounds_to_db import *
 from call_db import *
 import logging
-from shapes_predictor.draw import Draw
-
+from shapes_predictor.draw import Predict
 
 count = Counter()
 logger = logging.getLogger(__name__)
@@ -148,7 +147,6 @@ class Make_geom(PrepCals):
         self.finish_line_g = next(get_range)[0].__add__(self.starting_line)
         return self.towrite_data[self.starting_line: self.finish_line_g]
 
-    
     @logging_decor
     def alter_file(self):
         self.height = self.exception(float(input('Type height of sample: ')), self.MIN_MAX_h[1], self.MIN_MAX_h[0])
@@ -158,7 +156,7 @@ class Make_geom(PrepCals):
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
         for i in range(self.sample_parts):
             pattern += f'RCZ {drop_nums}{i+1} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {self.radius}\n'
-        Draw().play() if input('Is radius split required? ') == 'y' else print('one cylinder setted') 
+        Predict().predict() if input('Is radius split required? ') == 'y' else print('one cylinder setted') 
         block = self.parse_block
         for n, i in enumerate(block):
             if i.startswith('\n'):

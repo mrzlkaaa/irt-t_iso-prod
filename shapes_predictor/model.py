@@ -6,12 +6,13 @@ import PIL
 import tensorflow as tf
 # from tensorflow import keras
 
-cwd = os.getcwd()
-files_list = os.listdir(cwd)
+CWD = os.path.join(os.getcwd(), 'shapes_predictor')
+files_list = os.listdir(CWD)
+print(files_list)
 # check for .h5 file
 file = [i for i in files_list if re.search(r'\.h5', i)]
 if file:
-        model = tf.keras.models.load_model(next(iter(file)))
+        model = tf.keras.models.load_model(os.path.join(CWD, next(iter(file))))
         print(model.summary())
         print('model has loaded')
 else:
@@ -21,7 +22,7 @@ else:
         circle = 'circles'
 
         train_ds = tf.keras.utils.image_dataset_from_directory(
-                os.path.join(os.getcwd(), circle),
+                os.path.join(CWD, circle),
                 labels='inferred',
                 batch_size = batch_size,
                 image_size = IMG_SIZE,
@@ -31,7 +32,7 @@ else:
         )
 
         val_ds = tf.keras.utils.image_dataset_from_directory(
-                os.path.join(os.getcwd(), circle),
+                os.path.join(CWD, circle),
                 labels='inferred',
                 batch_size = batch_size,
                 image_size = IMG_SIZE,

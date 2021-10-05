@@ -7,7 +7,7 @@ import logging
 from collections import Counter
 from PIL import Image
 from pygame.locals import *
-# from model import *
+from shapes_predictor.model import *
 
 #folder structure
 #circles--->
@@ -18,19 +18,18 @@ from pygame.locals import *
 # ->3circles
 #   -> .png names statrwith 2circles(random_chars).png
 # ..........
+
 pygame.init()
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 class Draw:
     width, height = 800, 600
     white = [255,255,255]
     black = [0,0,0]
-    CWD = os.getcwd()
-
-
+    
     def __init__(self):
         self.count = Counter()
-        self.circle = 'circles'
-        
+        self.circle = 'circles' #* will be dynamic in future
         self.dcount = {}
         self.set_display()
 
@@ -41,7 +40,7 @@ class Draw:
         self.press = False
 
     def mk_path(self, num, input):
-        if not os.path.exists(os.path.join(self.CWD, input)):
+        if not os.path.exists(os.path.join(CWD, input)):
             os.mkdir(os.path.join(CWD, input))
         PATH = os.path.join(CWD, input)
         response_path = os.path.join(PATH, f'{num}{input}')
@@ -103,10 +102,10 @@ class Draw:
                 self.display.fill(self.white)
                 self.dcount.clear()
 
-            # if keys[pygame.K_c]:
-                # save_to_predict = self.mk_path(input)
+            if keys[pygame.K_c]:
+                save_to_predict = self.mk_path(input)
 
-                # self.predict()
+                self.predict()
 
             if keys[pygame.K_s]:
                 self.save(self.circle)
@@ -127,23 +126,24 @@ class Predict(Draw):
         return sorted(os.listdir(self.full_path), key=lambda x: os.stat(os.path.join(self.full_path,x)).st_mtime, reverse=True)
 
     def predict(self):
-        if self.save(self.predictions):
+        # if self.save(self.predictions):
             # print(self.last_created_img())
-            img = tf.keras.utils.load_img(
-                    os.path.join(self.full_path, self.last_created_img[0]),
-                    color_mode = 'rgb',
-                    target_size = (180, 180),
-            )
-            arr_img = tf.keras.preprocessing.image.img_to_array(img)
-            arr_img = np.array([arr_img])
-            print(arr_img.shape)
-            probability_model = tf.keras.Sequential([model,
-                                         tf.keras.layers.Softmax()])
-            predict = probability_model.predict(arr_img)
-            print(predict)
-            index = np.argwhere(predict[0]==np.amax(predict[0]))[0]
-            print(index)
-            print(f'I predict there is/are { self.class_names[index[0]]} on screen!')
+        self.full_path = os.path.join(CWD, 'predictions', '3predictions')
+        img = tf.keras.utils.load_img(
+                os.path.join(self.full_path, self.last_created_img[0]),
+                color_mode = 'rgb',
+                target_size = (180, 180),
+        )
+        arr_img = tf.keras.preprocessing.image.img_to_array(img)
+        arr_img = np.array([arr_img])
+        print(arr_img.shape)
+        probability_model = tf.keras.Sequential([model,
+                                     tf.keras.layers.Softmax()])
+        predict = probability_model.predict(arr_img)
+        print(predict)
+        index = np.argwhere(predict[0]==np.amax(predict[0]))[0]
+        print(index)
+        print(f'I predict there is/are { self.class_names[index[0]]} on screen!')
         return
 
         # model = predict
