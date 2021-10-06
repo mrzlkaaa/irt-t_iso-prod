@@ -1,11 +1,11 @@
-import os
+import os, sys
 import concurrent.futures
 import datetime
 import copy
 import asyncio
 import re
 from statistics import mean
-from collections import Counter
+from collections import Counter, defaultdict
 from compounds_to_db import *
 from call_db import *
 import logging
@@ -38,6 +38,7 @@ class PrepCals:
     def open(self, path):
         with open(path, 'r', encoding='latin-1') as fl:
             return fl.readlines()
+            # return (i for i in fl.readlines())
     
     @logging_decor
     def output(self, file_name):
@@ -53,6 +54,7 @@ class PrepCals:
 
 
 class Make_matr(PrepCals):
+    test = 'testarg'
     def __init__(self, *args, **kwargs):
         # self.inp_comp = 'Ba(NO3)2'
         # self.inp_comp = 'Fe2O3'
@@ -62,6 +64,7 @@ class Make_matr(PrepCals):
         self.FILE_PATH = os.path.join(
             self.direc, 'input_mcu_file', 'matr-1465-crit')
         self.towrite_data = self.open(self.FILE_PATH)
+        print(sys.getsizeof(self.towrite_data))
         self.PEREODIC_TABLE = Call_PT().to_form_dic
         self.comp_db = Call_comp()
         self.add_todb = Comp_to_db(self.inp_comp, self.PEREODIC_TABLE)
@@ -102,73 +105,70 @@ class Make_matr(PrepCals):
         logger.debug(f'Material "{pattern_num[:-2]}" added')
         logger.debug(f'Nuclear density "{pattern}" added')
         # print(self.towrite_data)
-        self.output('matr')
-        # return Make_geom(self.inp_comp).make() #* must be run with as asyncio 
+        # self.output('matr')
 
 
 class Make_geom(PrepCals):
-    MAX_RAD = 2
-    MIN_MAX_h = [-4, 62]
+    MAX_RAD = 2 #* will be dynamic corresponding with CH_NAME
+    MIN_MAX_h = [-4, 62] #* will be dynamic corresponding with CH_NAME
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.inp_comp = kwargs['input']
+        self.height = self.exception(kwargs['height'], self.MIN_MAX_h[1], self.MIN_MAX_h[0])
+        self.radius = self.exception(kwargs['radius'], self.MAX_RAD)
+        self.sample_parts = kwargs['sample_parts']
+        self.radius_devision = kwargs['radius_devision'] #boolean
         self.FILE_PATH = os.path.join(
             self.direc, 'input_mcu_file', 'geom_be_tvs_6layer_10.12.2018')
         self.towrite_data = self.open(self.FILE_PATH)  # * open file and grap all content
         self.CH_NAME = 'CEC1' #* will be dynamic
 
-    def exception(self, value, max_value, min_value=None): #TODO add exceptions and error handlers
+    def exception(self, value, max_value, min_value=None):
         if min_value is None:
-            if value <= max_value:
-                return value
-            else:
-                return self.exception(float(input(f'type value that smaller of equal to {max_value} ')), max_value)
+            response = value if 0 < value <= max_value else self.exception(float(input(f'type value that smaller of equal to {max_value} ')), max_value)
+            return response
         else:
-            if min_value <= value <= max_value:
-                return value
-            else:
-                return self.exception(float(input(f'type value that smaller or equal to {max_value} / bigger or equal to {min_value} ')), max_value, min_value)
+            response = value if min_value <= value <= max_value else self.exception(float(input(f'type value that smaller or equal to {max_value} / bigger or equal to {min_value} ')), max_value, min_value)
+            return response 
                 
     @property
     def set_h(self):
         return mean(list(map(abs, self.MIN_MAX_h)))-self.height/2
-
     
     def set_r(self, radius, parts):
         radius-=self.radius/parts
         return radius
     
+    def value_formatter(self, value):
+        return format(value, ".3f")
+
     @property
-    def parse_block(self):
-        get_pos = ((n, i) for n, i in enumerate(
-            self.towrite_data, start=1) if self.CH_NAME in i)  # * get the specific geom block starting line
-        self.starting_line = next(get_pos)[0]
-        get_range = ((n, i) for n, i in enumerate(
-            self.towrite_data[self.starting_line:], start=1) if 'END' in i or 'ENDL' in i)
-        self.finish_line_g = next(get_range)[0].__add__(self.starting_line)
-        return self.towrite_data[self.starting_line: self.finish_line_g]
+    def loop_text_block(self):
+        positions = defaultdict(tuple)
+        for n,i in enumerate(self.towrite_data, start=1):
+            if self.CH_NAME in i:
+                positions['start'] += (n,i)
+            elif 'ENDL' in i and len(positions)>0:
+                positions['end'] += (n,i)
+                break
+        return self.towrite_data[positions['start'][0]: positions['end'][0]], positions['start'][0], positions['end'][0]
 
     @logging_decor
-    def alter_file(self):
-        self.height = self.exception(float(input('Type height of sample: ')), self.MIN_MAX_h[1], self.MIN_MAX_h[0])
-        self.radius = self.exception(float(input('Type radius of sample: ')), self.MAX_RAD)
-        self.sample_parts = int(input('Type on how many parts divide body: '))
+    def modify_file(self):
         pattern = str()
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
-        print(drop_nums)
-        self.rad_parts = Predict().predict if input('Is radius division required? ') == 'y' else 1
+        self.rad_parts = Predict().predict if self.radius_devision else 1
         for i in range(1, self.sample_parts+1):
             for j in range(1, self.rad_parts+1):
-                pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.set_h+(self.height/self.sample_parts)*i} {self.height/self.sample_parts} {format(self.radius.__sub__(self.set_r(self.radius, j)), ".3f")}\n'
+                pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.value_formatter(self.set_h+(self.height/self.sample_parts)*i)} {self.value_formatter(self.height/self.sample_parts)} \
+                            {self.value_formatter(self.radius - self.set_r(self.radius, j))}\n'
+        print(hasattr(Make_matr(input = self.inp_comp), 'test')) #TODO take matr number from .log file
         print(pattern)
-        
-        block = self.parse_block
+        block, start, end = self.loop_text_block
         for n, i in enumerate(block):
-            if i.startswith('\n'):
-                count.update('+')  # *count of lines that added
-                self.towrite_data.insert(n+self.starting_line, pattern)
-        logger.debug(f'Body "{pattern}" has added in block from line "{self.starting_line}"')
-        self.output('geom')
+            if i.startswith('\n'): self.towrite_data.insert(n+start, pattern)
+        logger.debug(f'Body "{pattern}" has added in block from line "{start}"')
+        # self.output('geom')
         return
 
 #! add oprion to add a bunch of geometry objects
@@ -176,9 +176,22 @@ class Make_geom(PrepCals):
 
 if __name__ == '__main__':
     comp = 'Al2O3'
+    while True:
+        try:
+            height = 10
+            radius = 2
+            sample_parts = 5
+            radius_devision = True
+            # height = float(input('Type height of sample: '))
+            # radius = float(input('Type radius of sample: '))
+            # sample_parts = int(input('Type on how many parts divide body: '))
+            # radius_devision = True if input('Is radius division required? ').upper() == 'Y' else False
+            break
+        except ValueError as ve:
+            print(ve)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).make())
-        r2 = executor.submit(Make_geom(input=comp).alter_file())
+        r2 = executor.submit(Make_geom(input=comp, height=height, radius=radius, sample_parts=sample_parts, radius_devision=radius_devision).modify_file())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()
