@@ -4,12 +4,14 @@ import datetime
 import copy
 import asyncio
 import re
+import logging
+import datetime
 from statistics import mean
 from collections import Counter, defaultdict
 from compounds_to_db import *
 from call_db import *
-import logging
-from shapes_predictor.draw import Predict
+
+# from shapes_predictor.draw import Predict #comment it out for home_linux
 
 count = Counter()
 logger = logging.getLogger(__name__)
@@ -70,6 +72,7 @@ class Make_matr(PrepCals):
         self.add_todb = Comp_to_db(self.inp_comp, self.PEREODIC_TABLE)
     
     def make(self):
+        logger.info(f'has started with {self.__class__.__name__} in {datetime.datetime.now()}')
         self.identify()
 
     def identify(self):
@@ -102,7 +105,7 @@ class Make_matr(PrepCals):
             pattern = f'{self.inp_comp.upper()}  {self.nuc_dens}'
         self.towrite_data.insert(last_num[0]+2, pattern_num)
         self.towrite_data.insert(last_num[0]+3, pattern)
-        logger.debug(f'Material "{pattern_num[:-2]}" added')
+        logger.info(f'Material "{pattern_num[:-2]}" added')
         logger.debug(f'Nuclear density "{pattern}" added')
         # print(self.towrite_data)
         # self.output('matr')
@@ -142,13 +145,16 @@ class Make_geom(PrepCals):
     def value_formatter(self, value):
         return format(value, ".3f")
 
+    def pull_log_data(self):
+        return
+
     @property
     def loop_text_block(self):
         positions = defaultdict(tuple)
         for n,i in enumerate(self.towrite_data, start=1):
             if self.CH_NAME in i:
                 positions['start'] += (n,i)
-            elif 'ENDL' in i and len(positions)>0:
+            elif 'ENDL' in i and len(positions) > 0:
                 positions['end'] += (n,i)
                 break
         return self.towrite_data[positions['start'][0]: positions['end'][0]], positions['start'][0], positions['end'][0]
@@ -157,17 +163,18 @@ class Make_geom(PrepCals):
     def modify_file(self):
         pattern = str()
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
-        self.rad_parts = Predict().predict if self.radius_devision else 1
+        # self.rad_parts = Predict().predict if self.radius_devision else 1  #comment it out for home_linux
+        self.rad_parts = 3
         for i in range(1, self.sample_parts+1):
             for j in range(1, self.rad_parts+1):
                 pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.value_formatter(self.set_h+(self.height/self.sample_parts)*i)} {self.value_formatter(self.height/self.sample_parts)} \
                             {self.value_formatter(self.radius - self.set_r(self.radius, j))}\n'
-        print(hasattr(Make_matr(input = self.inp_comp), 'test')) #TODO take matr number from .log file
+        #TODO take matr number from .log file
         print(pattern)
         block, start, end = self.loop_text_block
         for n, i in enumerate(block):
             if i.startswith('\n'): self.towrite_data.insert(n+start, pattern)
-        logger.debug(f'Body "{pattern}" has added in block from line "{start}"')
+        # logger.debug(f'Body "{pattern}" has added in block from line "{start}"')
         # self.output('geom')
         return
 
@@ -175,7 +182,7 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'Al2O3'
+    comp = 'TeO2'
     while True:
         try:
             height = 10
