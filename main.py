@@ -4,29 +4,19 @@ import datetime
 import copy
 import asyncio
 import re
-import logging
 import datetime
 from statistics import mean
 from collections import Counter, defaultdict
 from compounds_to_db import *
 from call_db import *
-
+from logger import Logging
 # from shapes_predictor.draw import Predict #comment it out for home_linux
-
-count = Counter()
-logger = logging.getLogger(__name__)
-PATH = os.path.join(os.getcwd(), 'output_mcu', logger.name)
-logger.setLevel(logging.INFO)
-logger.setLevel(logging.DEBUG)
-file_str = logging.FileHandler(f'{PATH}')
-logger.addHandler(file_str)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_str.setFormatter(formatter)
 
 def logging_decor(func):
     print(func)
     def wrapper(*args, **kwargs):
-        logger.info(f'Function "{func.__name__}" ran')
+        # Logging(__name__, 'INFO', f'Function "{func}" ran').file_handler
+        # logger.info(f'Function "{func.__name__}" ran')
         func(*args, **kwargs)
     return wrapper
 
@@ -36,6 +26,9 @@ class PrepCals:
         self.pth_burn = os.path.join(self.direc, 'input_mcu_file', 'burn')
         self.output_folder = os.path.join(self.direc, 'output_mcu')
         self.towrite_data = list()
+
+    def __repr__(self):
+        return f'Called class is {self.__class__.__name__}'
 
     def open(self, path):
         with open(path, 'r', encoding='latin-1') as fl:
@@ -49,14 +42,14 @@ class PrepCals:
         if not os.path.exists(set_path):
             os.makedirs(set_path)
         to_save_path = os.path.join(set_path, file_name)
-        logger.info(f'Saving path is "{set_path}" where "{file_name}" created successfully')
+        Logging(__name__, 'INFO', f'Saving path is "{set_path}" where "{file_name}" created successfully').file_handler
+        # logger.info(f'Saving path is "{set_path}" where "{file_name}" created successfully')
         # print(to_save_path)
         with open(to_save_path, 'w',  encoding='latin-1') as out:
             out.writelines(self.towrite_data)
 
 
 class Make_matr(PrepCals):
-    test = 'testarg'
     def __init__(self, *args, **kwargs):
         # self.inp_comp = 'Ba(NO3)2'
         # self.inp_comp = 'Fe2O3'
@@ -70,15 +63,11 @@ class Make_matr(PrepCals):
         self.PEREODIC_TABLE = Call_PT().to_form_dic
         self.comp_db = Call_comp()
         self.add_todb = Comp_to_db(self.inp_comp, self.PEREODIC_TABLE)
-    
-    def make(self):
-        logger.info(f'has started with {self.__class__.__name__} in {datetime.datetime.now()}')
-        self.identify()
 
+    @property
     def identify(self):
         if len(self.inp_comp) < 3:
-            self.nuc_dens = format(self.PEREODIC_TABLE[self.inp_comp][3], '.4f')
-            print(self.nuc_dens)
+            return format(self.PEREODIC_TABLE[self.inp_comp][3], '.4f')
         else:
             if not self.comp_db.check_exists(self.inp_comp):
                 async def asy_main():
@@ -87,13 +76,14 @@ class Make_matr(PrepCals):
                     await scrap
                     await get_nucl
                     return self.add_todb.densities
-                self.nuc_dens=asyncio.run(asy_main())
+                return asyncio.run(asy_main())
             else:
-                self.nuc_dens = self.comp_db.call_existing(self.inp_comp)
-        return self.alter_file()
+                return self.comp_db.call_existing(self.inp_comp)
 
     @logging_decor
-    def alter_file(self):
+    def modify_file(self):
+        Logging(self.__class__.__name__, 'INFO', f'Started with {self.__class__.__name__} in {datetime.datetime.now()}').file_handler
+        self.nuc_dens = self.identify
         pattern = str()
         last_num = max((n, int(re.search(r'\d+', num).group()))
                         for n, num in enumerate(self.towrite_data) if not bool(num.find('MATR')))  #* tuple of (line,matr)
@@ -105,8 +95,9 @@ class Make_matr(PrepCals):
             pattern = f'{self.inp_comp.upper()}  {self.nuc_dens}'
         self.towrite_data.insert(last_num[0]+2, pattern_num)
         self.towrite_data.insert(last_num[0]+3, pattern)
-        logger.info(f'Material "{pattern_num[:-2]}" added')
-        logger.debug(f'Nuclear density "{pattern}" added')
+        Logging(self.__class__.__name__, 'INFO', f'Material "{pattern_num[:-2]}" added in {datetime.datetime.now()}').file_handler
+        # logger.info(f'Material "{pattern_num[:-2]}" added')
+        # logger.debug(f'Nuclear density "{pattern}" added')
         # print(self.towrite_data)
         # self.output('matr')
 
@@ -146,6 +137,9 @@ class Make_geom(PrepCals):
         return format(value, ".3f")
 
     def pull_log_data(self):
+        with open(os.path.join(self.direc, 'output_mcu', 'Make_matr')) as log:
+            # data = (i for i)
+
         return
 
     @property
@@ -182,7 +176,7 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'TeO2'
+    comp = 'Al2O3'
     while True:
         try:
             height = 10
@@ -196,8 +190,8 @@ if __name__ == '__main__':
             break
         except ValueError as ve:
             print(ve)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        r1 = executor.submit(Make_matr(input=comp).make())
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        r1 = executor.submit(Make_matr(input=comp).modify_file())
         r2 = executor.submit(Make_geom(input=comp, height=height, radius=radius, sample_parts=sample_parts, radius_devision=radius_devision).modify_file())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
