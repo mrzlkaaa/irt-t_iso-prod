@@ -136,11 +136,20 @@ class Make_geom(PrepCals):
     def value_formatter(self, value):
         return format(value, ".3f")
 
-    def pull_log_data(self):
+    def pull_log_data(self, sleep = 0):
+        time.sleep(sleep)
         with open(os.path.join(self.direc, 'output_mcu', 'Make_matr')) as log:
-            # data = (i for i)
-
-        return
+            l = sorted(log.readlines(), reverse=True)
+        last_line = next(iter(l))
+        if 'MATR' in last_line:
+            matr_index = last_line.split().index('"MATR')
+            matr_num = last_line[matr_index+1]
+            print('got data')
+            return matr_num
+        else:
+            print('sleeping....')
+            return self.pull_log_data(1)
+        
 
     @property
     def loop_text_block(self):
@@ -155,6 +164,7 @@ class Make_geom(PrepCals):
 
     @logging_decor
     def modify_file(self):
+        print('started with geom module')
         pattern = str()
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
         # self.rad_parts = Predict().predict if self.radius_devision else 1  #comment it out for home_linux
@@ -164,7 +174,8 @@ class Make_geom(PrepCals):
                 pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.value_formatter(self.set_h+(self.height/self.sample_parts)*i)} {self.value_formatter(self.height/self.sample_parts)} \
                             {self.value_formatter(self.radius - self.set_r(self.radius, j))}\n'
         #TODO take matr number from .log file
-        print(pattern)
+        self.pull_log_data()
+        # print(pattern)
         block, start, end = self.loop_text_block
         for n, i in enumerate(block):
             if i.startswith('\n'): self.towrite_data.insert(n+start, pattern)
@@ -176,7 +187,7 @@ class Make_geom(PrepCals):
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'Al2O3'
+    comp = 'TeO2'
     while True:
         try:
             height = 10
@@ -190,11 +201,10 @@ if __name__ == '__main__':
             break
         except ValueError as ve:
             print(ve)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    with concurrent.futures.ProcessPoolExecutor() as executor:
         r1 = executor.submit(Make_matr(input=comp).modify_file())
+        print('ran second')
         r2 = executor.submit(Make_geom(input=comp, height=height, radius=radius, sample_parts=sample_parts, radius_devision=radius_devision).modify_file())
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()
-
-
