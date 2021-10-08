@@ -15,7 +15,7 @@ from logger import Logging
 def logging_decor(func):
     print(func)
     def wrapper(*args, **kwargs):
-        # Logging(__name__, 'INFO', f'Function "{func}" ran').file_handler
+        Logging(__name__, 'INFO', f'Function "{func}" ran').file_handler
         # logger.info(f'Function "{func.__name__}" ran')
         func(*args, **kwargs)
     return wrapper
@@ -43,23 +43,17 @@ class PrepCals:
             os.makedirs(set_path)
         to_save_path = os.path.join(set_path, file_name)
         Logging(__name__, 'INFO', f'Saving path is "{set_path}" where "{file_name}" created successfully').file_handler
-        # logger.info(f'Saving path is "{set_path}" where "{file_name}" created successfully')
-        # print(to_save_path)
         with open(to_save_path, 'w',  encoding='latin-1') as out:
             out.writelines(self.towrite_data)
 
 
 class Make_matr(PrepCals):
     def __init__(self, *args, **kwargs):
-        # self.inp_comp = 'Ba(NO3)2'
-        # self.inp_comp = 'Fe2O3'
-        # self.inp_comp = 'Al2O3'
         super().__init__(*args, **kwargs)
         self.inp_comp = kwargs['input']
         self.FILE_PATH = os.path.join(
             self.direc, 'input_mcu_file', 'matr-1465-crit')
         self.towrite_data = self.open(self.FILE_PATH)
-        print(sys.getsizeof(self.towrite_data))
         self.PEREODIC_TABLE = Call_PT().to_form_dic
         self.comp_db = Call_comp()
         self.add_todb = Comp_to_db(self.inp_comp, self.PEREODIC_TABLE)
@@ -81,7 +75,7 @@ class Make_matr(PrepCals):
                 return self.comp_db.call_existing(self.inp_comp)
 
     @logging_decor
-    def modify_file(self):
+    def modify_file(self): #! revision required
         Logging(self.__class__.__name__, 'INFO', f'Started with {self.__class__.__name__} in {datetime.datetime.now()}').file_handler
         self.nuc_dens = self.identify
         pattern = str()
@@ -136,21 +130,21 @@ class Make_geom(PrepCals):
     def value_formatter(self, value):
         return format(value, ".3f")
 
-    def pull_log_data(self, sleep = 0):
-        time.sleep(sleep)
+    @property
+    def pull_log_data(self):
         with open(os.path.join(self.direc, 'output_mcu', 'Make_matr')) as log:
             l = sorted(log.readlines(), reverse=True)
         last_line = next(iter(l))
         if 'MATR' in last_line:
             matr_index = last_line.split().index('"MATR')
-            matr_num = last_line[matr_index+1]
+            matr_num = last_line.split()[matr_index+1][:-1]
+            print(matr_num)
             print('got data')
             return matr_num
         else:
-            print('sleeping....')
-            return self.pull_log_data(1)
+            print('no data')
+            return '0'
         
-
     @property
     def loop_text_block(self):
         positions = defaultdict(tuple)
@@ -160,34 +154,49 @@ class Make_geom(PrepCals):
             elif 'ENDL' in i and len(positions) > 0:
                 positions['end'] += (n,i)
                 break
-        return self.towrite_data[positions['start'][0]: positions['end'][0]], positions['start'][0], positions['end'][0]
+        print(positions)
+        return self.towrite_data[positions['start'][0]: positions['end'][0]], positions['start'][0], positions['start'][2], positions['end'][0]
 
-    @logging_decor
-    def modify_file(self):
-        print('started with geom module')
-        pattern = str()
+    @property
+    def geom_pattern(self, body_pattern = '', cell_pattern=''): #written only for RCZ
         drop_nums = ''.join(re.findall(r"[^()0-9]+", self.inp_comp)).upper()
-        # self.rad_parts = Predict().predict if self.radius_devision else 1  #comment it out for home_linux
-        self.rad_parts = 3
+        matr_num = self.pull_log_data
         for i in range(1, self.sample_parts+1):
             for j in range(1, self.rad_parts+1):
-                pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.value_formatter(self.set_h+(self.height/self.sample_parts)*i)} {self.value_formatter(self.height/self.sample_parts)} \
+                body_pattern += f'RCZ {drop_nums}{i}{j} 0,0,{self.value_formatter(self.set_h+(self.height/self.sample_parts)*i)} {self.value_formatter(self.height/self.sample_parts)} \
                             {self.value_formatter(self.radius - self.set_r(self.radius, j))}\n'
-        #TODO take matr number from .log file
-        self.pull_log_data()
-        # print(pattern)
-        block, start, end = self.loop_text_block
-        for n, i in enumerate(block):
-            if i.startswith('\n'): self.towrite_data.insert(n+start, pattern)
-        # logger.debug(f'Body "{pattern}" has added in block from line "{start}"')
-        # self.output('geom')
+                cell_pattern += f'{drop_nums}{i}{j}    {drop_nums}{i}{j}    # m={matr_num}  z=50{i}{j}\n'
+        return body_pattern, cell_pattern
+
+    def inserting_pattern(self):
+
         return
+
+    @logging_decor
+    def modify_file(self): #todo make it more readable
+        print('started with geom module')
+        # self.rad_parts = Predict().predict if self.radius_devision else 1  #! comment it out for home_linux
+        self.rad_parts = 3
+        body, cell = self.geom_pattern
+        block, start, middle, end = self.loop_text_block
+        print(len(self.towrite_data))
+        for n, i in enumerate(block):
+            if i.startswith('\n') and n+start < middle: 
+                self.towrite_data.insert(n+start, body)
+                break
+        block, start, middle, end = self.loop_text_block
+        print(len(self.towrite_data))
+        for n, i in enumerate(block):
+            if i.startswith('\n') and n+start == end-3:
+                self.towrite_data.insert(n+start, cell)
+                break
+        return self.output('geom')
 
 #! add oprion to add a bunch of geometry objects
 #TODO combine with shape prediction model and drawing tool 
 
 if __name__ == '__main__':
-    comp = 'TeO2'
+    comp = 'Al2O3'
     while True:
         try:
             height = 10
@@ -201,10 +210,8 @@ if __name__ == '__main__':
             break
         except ValueError as ve:
             print(ve)
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        r1 = executor.submit(Make_matr(input=comp).modify_file())
-        print('ran second')
-        r2 = executor.submit(Make_geom(input=comp, height=height, radius=radius, sample_parts=sample_parts, radius_devision=radius_devision).modify_file())
+    Make_matr(input=comp).modify_file()
+    Make_geom(input=comp, height=height, radius=radius, sample_parts=sample_parts, radius_devision=radius_devision).modify_file()
 # # PrepCals(input=comp)
 # Make_matr(input=comp).make()
 # Make_geom(input=comp).make()
