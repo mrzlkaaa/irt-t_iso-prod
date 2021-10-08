@@ -1,22 +1,16 @@
-2021-09-30 15:15:58,937 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 15:15:58,939 - __main__ - DEBUG - Material "MATR 1466" added
-2021-09-30 15:15:58,939 - __main__ - DEBUG - Nuclear density "BA  0.0448 / N  0.0075 / O  0.0149 / " added
-2021-09-30 15:15:58,939 - __main__ - INFO - Function "output" ran
-2021-09-30 15:15:58,941 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Ba(NO3)2_2021-09-30" where "matr" created successfully
-2021-09-30 15:43:43,909 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 15:44:02,501 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:03:01,249 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:03:29,160 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:04:12,769 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:04:35,927 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:06:27,764 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:06:50,393 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:09:33,449 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:10:04,861 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:10:25,941 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:17:02,953 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:17:38,576 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:24:42,336 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:24:58,710 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:30:00,655 - __main__ - INFO - Function "alter_file" ran
-2021-09-30 16:32:32,910 - __main__ - INFO - Function "alter_file" ran
+2021-10-08 10:49:29,396 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 10:52:04,006 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 10:54:14,607 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 10:55:06,817 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:07:58,090 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:08:42,480 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:11:06,052 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:13:14,068 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:14:17,725 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:15:43,257 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:15:50,064 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:16:57,290 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:17:19,989 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:17:38,400 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:18:15,696 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
+2021-10-08 11:19:27,907 - __main__ - INFO - Saving path is "/mnt/c/Users/Nikita/Desktop/codes/Isotopes_prod/output_mcu/Al2O3_2021-10-08" where "geom" created successfully
